@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moving Balls with Proximity Lines</title>
+<style>
+  html,body{margin:0;background:#000;overflow:hidden;}
+  canvas{display:block;width:100vw;height:100vh;}
+</style>
+</head>
+<body>
+<canvas id="screen"></canvas>
+
+<script>
+/* ------------- CONFIG -------------------------------------------------- */
+const BALL_COUNT       = 100;    // target number of balls on screen (steady‑state)
+
+// --- Ball appearance & motion
+const MIN_RADIUS       = 2;      // px — smallest ball
+const MAX_RADIUS       = 5;      // px — largest ball
+const MIN_SPEED        = 0.05;   // px / frame
+const MAX_SPEED        = 0.12;
+
+// --- Proximity‑line behaviour
+const NEIGHBOR_RADIUS  = 200;    // draw line when distance < this (px)
+const MAX_LINE_WIDTH   = 2;      // px — when two balls almost overlap
+
+// --- Population maintenance
+const RESPAWN_PROB     = 0.99;   // probability to spawn a new ball for each escaped ball
+
+// --- Colors
+const BALL_COLOR       = '#FFB200';    // sun‑like deep yellow
+const LINE_COLOR_BASE  = [255, 200,  40]; // RGB base for lines (will blend alpha)
+/* ----------------------------------------------------------------------- */
+
+const cvs = document.getElementById('screen');
+const ctx = cvs.getContext('2d');
+
+function resize(){
+  cvs.width  = window.innerWidth;
+  cvs.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ---------- utilities -------------------------------------------------- */
+const rand = (a,b) => Math.random() * (b-a) + a;
+
+function makeBallInside(){
+  const angle = rand(0, Math.PI*2);
+  const speed = rand(MIN_SPEED, MAX_SPEED);
+  const radius = rand(MIN_RADIUS, MAX_RADIUS);
+  return {
+    r : radius,
+    x : rand(radius, cvs.width  - radius),
+    y : rand(radius, cvs.height - radius),
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed
+  };
+}
+
+function makeBallEntering(){
+  const edge  = Math.floor(Math.random()*4);   // 0-top 1-right 2-bottom 3-left
+  const speed = rand(MIN_SPEED, MAX_SPEED);
+  const radius= rand(MIN_RADIUS, MAX_RADIUS);
+  let x,y,vx,vy;
+  switch(edge){
+    case 0: x = rand(radius, cvs.width-radius); y = -radius;                   vx = rand(-1,1)*speed; vy =  speed;  break;
+    case 1: x = cvs.width + radius;              y = rand(radius, cvs.height-radius); vx = -speed;          vy = rand(-1,1)*speed; break;
+    case 2: x = rand(radius, cvs.width-radius); y = cvs.height + radius;      vx = rand(-1,1)*speed; vy = -speed;  break;
+    default: x = -radius;                       y = rand(radius, cvs.height-radius); vx =  speed;          vy = rand(-1,1)*speed;
+  }
+  return {r:radius, x,y,vx,vy};
+}
+
+/* ---------- initialise population -------------------------------------- */
+let balls = Array.from({length:BALL_COUNT}, makeBallInside);
+
+/* ---------- main animation loop ---------------------------------------- */
+function step(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+
+  /* --- 1. draw dynamic proximity lines -------------------------------- */
+  for(let i=0;i<balls.length;i++){
+    for(let j=i+1;j<balls.length;j++){
+      const a = balls[i], b = balls[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const distSq = dx*dx + dy*dy;
+      if (distSq < NEIGHBOR_RADIUS*NEIGHBOR_RADIUS){
+        const dist   = Math.sqrt(distSq);
+        const t      = dist / NEIGHBOR_RADIUS;          // 0 (close) → 1 (edge)
+        const width  = 1 + (1 - t) * (MAX_LINE_WIDTH-1);
+        const alpha  = 0.2 + (1 - t) * 0.8;
+
+        ctx.lineWidth   = width;
+        ctx.strokeStyle = `rgba(${LINE_COLOR_BASE[0]},${LINE_COLOR_BASE[1]},${LINE_COLOR_BASE[2]},${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  /* --- 2. draw & move balls ------------------------------------------- */
+  ctx.fillStyle = BALL_COLOR;
+  balls.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    ctx.fill();
+
+    b.x += b.vx;
+    b.y += b.vy;
+  });
+
+  /* --- 3. cull off‑screen balls & respawn ------------------------------ */
+  const next = [];
+  let escaped = 0;
+  balls.forEach(b=>{
+    const off = b.x < -b.r || b.x > cvs.width + b.r || b.y < -b.r || b.y > cvs.height + b.r;
+    if (off) escaped++; else next.push(b);
+  });
+  for(let i=0;i<escaped;i++){
+    if (Math.random() < RESPAWN_PROB) next.push( makeBallEntering() );
+  }
+  balls = next;
+
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+</script>
+</body>
+</html>
