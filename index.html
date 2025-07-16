@@ -2,13 +2,50 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Moving Balls with Proximity Lines</title>
+<title>Moving Balls with Proximity Lines & Profile Overlay</title>
 <style>
-  html,body{margin:0;background:#000;overflow:hidden;}
+  /* --- Reset & layout -------------------------------------------------- */
+  html,body{margin:0;background:#000;overflow:hidden;font-family:system-ui, sans-serif;}
   canvas{display:block;width:100vw;height:100vh;}
+
+  /* --- Profile overlay ------------------------------------------------- */
+  #profile{
+    position:absolute;
+    top:20px;left:20px;
+    display:flex;align-items:center;gap:12px;
+    background:rgba(0,0,0,0.6);
+    border-radius:12px;
+    padding:16px 20px;
+    backdrop-filter:blur(4px);
+    color:#fff;
+    box-shadow:0 4px 15px rgba(0,0,0,0.4);
+    max-width:80vw;
+  }
+  #profile img{
+    width:80px;height:80px;
+    border-radius:50%;
+    object-fit:cover;
+    flex-shrink:0;
+  }
+  #profile h2{margin:0 0 4px;font-size:1.25rem;}
+  #profile p{margin:0;font-size:0.9rem;line-height:1.35;opacity:0.85;}
+  @media(max-width:480px){
+    #profile{flex-direction:column;align-items:flex-start;padding:12px;}
+    #profile img{width:64px;height:64px;}
+  }
 </style>
 </head>
 <body>
+<!-- Profile block (replace placeholders with your details) -->
+<div id="profile">
+  <img src="profile.jpg" alt="Your Photo" id="avatar" />
+  <div>
+    <h2>Saif Ahmad</h2>
+    <p>Postdoc Researcher, Power Systems, Energy Markets<br>Short bio or tagline goes here.</p>
+  </div>
+</div>
+
+<!-- Animation canvas -->
 <canvas id="screen"></canvas>
 
 <script>
@@ -29,7 +66,7 @@ const MAX_LINE_WIDTH   = 2;      // px — when two balls almost overlap
 const RESPAWN_PROB     = 0.99;   // probability to spawn a new ball for each escaped ball
 
 // --- Colors
-const BALL_COLOR       = '#FFB200';    // sun‑like deep yellow
+const BALL_COLOR       = '#f59505';    // sun‑like deep yellow
 const LINE_COLOR_BASE  = [255, 200,  40]; // RGB base for lines (will blend alpha)
 /* ----------------------------------------------------------------------- */
 
