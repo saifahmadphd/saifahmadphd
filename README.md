@@ -45,8 +45,4 @@ I’m a power-systems researcher working on how **dynamic virtual power plants (
 - **Email:** saifiitp16@gmail.com  
 - **Website:** <https://sites.google.com/view/saifahmad-iitp/home>
 
----
 
-<p align="center">
-  <em>“Uncertainty is the only certainty there is” - John Allen Paulos</em>
-</p>
