@@ -7,7 +7,7 @@
 ---
 
 ### 👋 About Me
-I’m a control-systems researcher working on how **dynamic virtual power plants (DVPPs)** can deliver fast-frequency support in modern AC grids. My work blends power-electronics modeling, distributed optimization and data-driven forecasting to improve the resilience and flexibility of renewable-rich power systems.
+I’m a power-systems researcher working on how **dynamic virtual power plants (DVPPs)** can support fast-frequency regulation under resource constraints. My research interest lies in the intersecting areas of electrical systems, control \& optimization theory and communication theory, to improve the resilience and flexibility of renewable-rich power systems. 
 
 ### 🔬 Research Interests
 - Energy management for distributed renewables & storage  
